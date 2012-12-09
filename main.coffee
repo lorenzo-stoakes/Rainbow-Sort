@@ -71,10 +71,50 @@ isort = ->
 	index++
 	defer(isort) if index < colours.length
 
-qsort = ->
+bsort = ->
+	swapped = false
+	for i in [1...colours.length]
+		if colours[i - 1].val <= colours[i].val
+			swapRects(i - 1, i)
+			swapped = true
+
+	defer(bsort) if swapped
+
+qsort = (tukey) ->
+	# Put the median of colours.val's in colours[a].
+	# Shamelessly stolen from Go's quicksort implementation.
+	# See http://golang.org/src/pkg/sort/sort.go
+	medianOfThree = (a, b, c) ->
+		# Rename vars for clarity, as we want the median in a, not b.
+		m0 = b
+		m1 = a
+		m2 = c
+
+		# Bubble sort on colours[m0,m1,m2].val
+		swapRects(m1, m0) if colours[m1].val < colours[m0].val
+		swapRects(m2, m1) if colours[m2].val < colours[m1].val
+		swapRects(m1, m0) if colours[m1].val < colours[m0].val
+
+		# Now colours[m0].val <= colours[m1].val <= colours[m2].val
+
 	getPivotInd = (from, to) ->
-		# Middle for now. Do it this way to avoid overflow.
-		return Math.floor(from + (to - from)/2)
+		# Do it this way to avoid overflow.
+		mid = Math.floor(from + (to - from)/2)
+
+		return mid if !tukey
+
+		# Using Tukey's 'median of medians'
+		# See http://www.johndcook.com/blog/2009/06/23/tukey-median-ninther/
+		if to - from > 40
+			s = Math.floor((to - from)/8)
+			medianOfThree(from, from + s, from + 2 * s)
+			medianOfThree(mid, mid - s, mid + s)
+			medianOfThree(to - 1, to - 1 - s, to - 1 - 2 * s)
+
+		medianOfThree(from, mid, to - 1)
+
+		# We've put the median in from.
+		return from
 
 	partition = (from, to, pivotInd) ->
 		pivot = colours[pivotInd].val
