@@ -1,11 +1,13 @@
 [rectWidth, rectHeight] = [10, 10]
 
 # Initialised by reset().
-width = null
+checkDoneInterval = null
+colours = null
+context = null
 height = null
 index = null
-context = null
-colours = null
+start = null
+width = null
 
 # We set this after document is ready.
 canvas = null
