@@ -91,7 +91,7 @@ isort = ->
 bsort = ->
 	swapped = false
 	for i in [1...colours.length]
-		if colours[i - 1].val <= colours[i].val
+		if colours[i - 1].val > colours[i].val
 			swapRects(i - 1, i)
 			swapped = true
 
