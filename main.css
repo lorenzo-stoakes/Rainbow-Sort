@@ -27,3 +27,14 @@ a {
 .num {
     width: 40px;
 }
+
+.rounded-corners {
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -khtml-border-radius: 10px;
+    border-radius: 10px;
+}
+
+.shadow {
+   box-shadow: 0 0 5px rgba(120,120,120,0.7), 5px 5px 10px rgba(120,120,120,0.7);
+}
