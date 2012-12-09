@@ -14,7 +14,9 @@ timeouts = []
 defer = (fn) ->
 	timeouts.push(window.setTimeout(fn, 0))
 
-toHslString = (h) -> "hsl(#{h}, 100%, 50%);"
+toHslString = (h) ->
+	# Firefox doesn't like a semicolon here. Go figure!
+	"hsl(#{h}, 100%, 50%)"
 
 initColours = ->
 	for x in [0...width] by rectWidth
