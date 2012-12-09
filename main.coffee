@@ -175,9 +175,11 @@ $(document).ready(->
 		selected = $('#algo').val()
 
 		sort =
-			switch selected
-				when 'Insertion Sort' then isort
-				when 'Quick Sort'     then qsort
+			switch $(@).children(':selected').attr('id')
+				when 'bsort'  then bsort
+				when 'isort'  then isort
+				when 'qsort1' then -> qsort(false)
+				when 'qsort2' then -> qsort(true)
 
 		reset()
 	)
