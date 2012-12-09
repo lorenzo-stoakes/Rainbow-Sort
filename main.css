@@ -1,12 +1,12 @@
+a {
+    color: white;
+    text-decoration: none;
+}
+
 #mainCanvas {
     position: fixed;
     left: 0;
     top: 0;
-}
-
-a {
-    color: white;
-    text-decoration: none;
 }
 
 #panel {
