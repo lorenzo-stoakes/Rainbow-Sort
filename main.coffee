@@ -162,8 +162,8 @@ qsort = (tukey) ->
 
 	doQsort(0, colours.length - 1)
 
-# Default to insertion sort.
-sort = isort
+# Default to bubble sort.
+sort = bsort
 
 $(document).ready(->
 	canvas = $('#mainCanvas')
