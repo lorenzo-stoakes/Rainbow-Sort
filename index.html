@@ -10,11 +10,15 @@
     <div id="panel" class="shadow rounded-corners">
       <button id="reset">Reset</button>
       <select id="algo">
-        <option>Insertion Sort</option>
-        <option>Quick Sort</option>
+        <option id="bsort">Bubble Sort</option>
+        <option id="isort">Insertion Sort</option>
+        <option id="qsort1">Quick Sort (using mid-point pivot)</option>
+        <option id="qsort2">Quick Sort (using Tukey's median-of-medians pivot)</option>
       </select>
       <input type="number" class="num" id="squareSize" />
       <a href="/">Done</a>
+      <br />
+      <p>Last <span id="algoName">(n/a)</span> run completed in <span id="ms">(n/a)</span> ms.</p>
     </div>
   </body>
 </html>
