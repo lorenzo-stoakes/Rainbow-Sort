@@ -1,0 +1,29 @@
+#mainCanvas {
+    position: fixed;
+    left: 0;
+    top: 0;
+}
+
+a {
+    color: white;
+    text-decoration: none;
+}
+
+#panel {
+    background-color: black;
+    color: white;
+    float: right;
+    font-family: 'Helvetica', sans-serif;
+    font-size: 10pt;
+    opacity: 0.4;
+    padding: 1em;
+    z-index: 10;
+}
+
+#panel:hover {
+    opacity: 0.7;
+}
+
+.num {
+    width: 40px;
+}
