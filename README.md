@@ -1,1 +1,1 @@
-Basic visualisation of insertion sort, quick sort using HTML 5 canvas.
+Basic visualisation of various sort algorithms using HTML 5 canvas.
