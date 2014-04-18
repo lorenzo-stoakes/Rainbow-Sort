@@ -162,6 +162,40 @@ qsort = (tukey) ->
 
 	doQsort(0, colours.length - 1)
 
+hsort = ->
+	stack = []
+	work = -> 
+		if stack.length
+			stack.pop()()
+			defer(work)
+
+	size = colours.length
+
+	maxHeapify = (i) ->
+		left = i*2 + 1
+		right = i*2 + 2
+		largest = i
+		largest = left if left < size and colours[left].val > colours[i].val
+		largest = right if right < size and colours[right].val > colours[largest].val
+		if i isnt largest
+			swapRects(i,largest)
+			maxHeapify(largest)
+			#stack.push(-> maxHeapify(largest))
+
+	popMaxvalue = ->
+		throw "?" if size < 1
+		size--
+		swapRects(0,size)
+		maxHeapify(0) if size > 0
+
+	for i in [size-1...0]
+		stack.push(popMaxvalue)
+	for i in [0..size//2 - 1]
+		do (i) -> 
+			stack.push(-> maxHeapify(i))
+
+	do work
+
 # Default to bubble sort.
 sort = bsort
 
@@ -180,6 +214,7 @@ $(document).ready(->
 				when 'isort'  then isort
 				when 'qsort1' then -> qsort(false)
 				when 'qsort2' then -> qsort(true)
+				when 'hsort' then hsort
 
 		reset()
 	)
