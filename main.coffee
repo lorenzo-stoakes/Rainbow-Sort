@@ -162,15 +162,19 @@ qsort = (tukey) ->
 
 	doQsort(0, colours.length - 1)
 
+# Heapsort
+# Based on a Java implementation found here: http://git.io/heapsort
 hsort = ->
+	# Let the browser render between steps using a call stack
 	stack = []
-	work = -> 
+	work = ->
 		if stack.length
-			stack.pop()()
-			defer(work)
+			stack.pop()() # execute stack top
+			defer(work) # loop
 
 	size = colours.length
 
+	# Make branch from i downwards a proper max heap
 	maxHeapify = (i) ->
 		left = i*2 + 1
 		right = i*2 + 2
@@ -178,20 +182,21 @@ hsort = ->
 		largest = left if left < size and colours[left].val > colours[i].val
 		largest = right if right < size and colours[right].val > colours[largest].val
 		if i isnt largest
-			swapRects(i,largest)
+			swapRects(i, largest)
 			maxHeapify(largest)
 			#stack.push(-> maxHeapify(largest))
 
-	popMaxvalue = ->
-		throw "?" if size < 1
+	# Remove the top of the heap and move it behind the heap
+	popMaxValue = ->
 		size--
-		swapRects(0,size)
+		swapRects(0, size)
 		maxHeapify(0) if size > 0
 
-	for i in [size-1...0]
-		stack.push(popMaxvalue)
-	for i in [0..size//2 - 1]
-		do (i) -> 
+	# Fill the call stack (reverse order)
+	for i in [size-1 ... 0]
+		stack.push(popMaxValue)
+	for i in [0 .. size//2 - 1]
+		do (i) ->
 			stack.push(-> maxHeapify(i))
 
 	do work
