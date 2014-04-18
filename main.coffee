@@ -163,7 +163,8 @@ qsort = (tukey) ->
 	doQsort(0, colours.length - 1)
 
 # Heapsort
-# Based on a Java implementation found here: http://git.io/heapsort
+# Based on this Java implementation: http://git.io/heapsort
+# @author Bernhard Häussner (https://github.com/bxt)
 hsort = ->
 	# Let the browser render between steps using a call stack
 	stack = []
