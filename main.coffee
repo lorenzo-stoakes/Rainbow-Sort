@@ -162,6 +162,46 @@ qsort = (tukey) ->
 
 	doQsort(0, colours.length - 1)
 
+# Heapsort
+# Based on this Java implementation: http://git.io/heapsort
+# @author Bernhard Häussner (https://github.com/bxt)
+hsort = ->
+	# Let the browser render between steps using a call stack
+	stack = []
+	work = ->
+		if stack.length
+			stack.pop()() # execute stack top
+			defer(work) # loop
+
+	size = colours.length
+
+	# Make branch from i downwards a proper max heap
+	maxHeapify = (i) ->
+		left = i*2 + 1
+		right = i*2 + 2
+		largest = i
+		largest = left if left < size and colours[left].val > colours[i].val
+		largest = right if right < size and colours[right].val > colours[largest].val
+		if i isnt largest
+			swapRects(i, largest)
+			maxHeapify(largest)
+			#stack.push(-> maxHeapify(largest))
+
+	# Remove the top of the heap and move it behind the heap
+	popMaxValue = ->
+		size--
+		swapRects(0, size)
+		maxHeapify(0) if size > 0
+
+	# Fill the call stack (reverse order)
+	for i in [size-1 ... 0]
+		stack.push(popMaxValue)
+	for i in [0 .. size//2 - 1]
+		do (i) ->
+			stack.push(-> maxHeapify(i))
+
+	do work
+
 # Default to bubble sort.
 sort = bsort
 
@@ -180,6 +220,7 @@ $(document).ready(->
 				when 'isort'  then isort
 				when 'qsort1' then -> qsort(false)
 				when 'qsort2' then -> qsort(true)
+				when 'hsort' then hsort
 
 		reset()
 	)
