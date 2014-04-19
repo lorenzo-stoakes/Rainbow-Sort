@@ -88,6 +88,18 @@ isort = ->
 	index++
 	defer(isort) if index < colours.length
 
+# Selection sort
+# @author Bernhard Häussner (https://github.com/bxt)
+ssort = ->
+	min = index-1
+	for j in [index-1 ... colours.length]
+		min = j if colours[j].val < colours[min].val
+
+	swapRects(index-1, min)
+
+	index++
+	defer(ssort) if index < colours.length
+
 bsort = ->
 	swapped = false
 	for i in [1...colours.length]
@@ -221,6 +233,7 @@ $(document).ready(->
 				when 'qsort1' then -> qsort(false)
 				when 'qsort2' then -> qsort(true)
 				when 'hsort' then hsort
+				when 'ssort' then ssort
 
 		reset()
 	)
