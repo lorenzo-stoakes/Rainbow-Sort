@@ -92,7 +92,7 @@ isort = ->
 # @author Bernhard Häussner (https://github.com/bxt)
 ssort = ->
 	min = index-1
-	for j in [index-1 ... colours.length]
+	for j in [index...colours.length]
 		min = j if colours[j].val < colours[min].val
 
 	swapRects(index-1, min)
