@@ -235,43 +235,52 @@ qsort = (tukey) ->
 # Based on this Java implementation: http://git.io/heapsort
 # @author Bernhard Häussner (https://github.com/bxt)
 hsort = ->
-        # Let the browser render between steps using a call stack
-        stack = []
-        work = ->
-                if stack.length
-                        stack.pop()() # execute stack top
-                        defer(work) # loop
+        sort_context ?=
+                j: colours.length // 2 - 1
+                last_j: colours.length // 2 - 1
+                size: colours.length
+                count: 0
+                making_heap: true
+                sifting_down: false
 
-        size = colours.length
+        { j, last_j, size, count, making_heap, sifting_down } = sort_context
 
-        # Make branch from i downwards a proper max heap
-        maxHeapify = (i) ->
-                left = i*2 + 1
-                right = i*2 + 2
-                largest = i
-                largest = left if left < size and colours[left].val > colours[i].val
+        if making_heap or sifting_down
+                left = j*2 + 1
+                right = j*2 + 2
+                largest = j
+                largest = left if left < size and colours[left].val > colours[j].val
                 largest = right if right < size and colours[right].val > colours[largest].val
-                if i isnt largest
-                        swapRects(i, largest)
-                        maxHeapify(largest)
-                        #stack.push(-> maxHeapify(largest))
+                if j isnt largest
+                        swapRects(j, largest)
+                        sort_context.j = largest
+                else if making_heap and last_j > 0 #last_j < size//2 - 1
+                        #sort_context.j = last_j + 1
+                        sort_context.j = last_j - 1
+                        sort_context.last_j = sort_context.j
+                else
+                        sort_context.making_heap = false
+                        sort_context.sifting_down = false
+        else
+                return if size == 0
 
-        # Remove the top of the heap and move it behind the heap
-        popMaxValue = ->
-                size--
-                swapRects(0, size)
-                maxHeapify(0) if size > 0
+                # Put largest block at end.
+                swapRects(0, size - 1)
 
-        # Fill the call stack (reverse order)
-        for i in [size-1 ... 0]
-                stack.push(popMaxValue)
-        for i in [0 .. size//2 - 1]
-                do (i) ->
-                        stack.push(-> maxHeapify(i))
+                # Now heapify the rest.
+                sort_context.size--
+                sort_context.sifting_down = true
+                sort_context.j = 0
 
-        do work
+        sort_context.count++
 
-# Default to bubble sort.
+        if (sort_context.count % UPDATE_INTERVAL) == 0
+                defer(hsort)
+        else
+                hsort()
+
+
+# Default to bubble sort
 sort = bsort
 
 $(document).ready(->
