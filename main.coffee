@@ -1,13 +1,16 @@
 [rectWidth, rectHeight] = [60, 60]
 
+UPDATE_INTERVAL = 1000
+
 # Initialised by reset().
 checkDoneInterval = null
 colours = null
 context = null
 height = null
-index = null
 start = null
 width = null
+
+sort_context = null
 
 # We set this after document is ready.
 canvas = null
@@ -47,7 +50,6 @@ reset = ->
         window.clearTimeout(timeout) while (timeout = timeouts.pop())
 
         colours = []
-        index = 1
         win = $(document)
         [width, height] = [$(document).width(), $(document).height()]
 
@@ -59,6 +61,7 @@ reset = ->
         start = Date.now()
 
         initColours()
+        sort_context = null
         defer(sort)
 
         checkDoneInterval = window.setInterval(checkDone, 10)
@@ -82,11 +85,28 @@ swapRects = (ind1, ind2) ->
         context.fillRect(val2.x, val2.y, rectWidth, rectHeight)
 
 isort = ->
-        for j in [index...0]
-                swapRects(j - 1, j) if colours[j - 1].val > colours[j].val
+        sort_context ?=
+                   i: 1
+                   j: 1
+                   count: 0
 
-        index++
-        defer(isort) if index < colours.length
+        { i, j, count } = sort_context
+
+        swapRects(j - 1, j) if colours[j - 1].val > colours[j].val
+
+        if j == 1
+                return if i == colours.length - 1
+                sort_context.i++
+                sort_context.j = sort_context.i
+        else
+                sort_context.j--
+
+        sort_context.count++
+
+        if (sort_context.count % UPDATE_INTERVAL) == 0
+                defer(isort)
+        else
+                isort()
 
 # Selection sort
 # @author Bernhard Häussner (https://github.com/bxt)
