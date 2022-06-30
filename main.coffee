@@ -226,10 +226,9 @@ qsort = (tukey) ->
 
                 sort_context.median_stack.pop() if swap_count >= 2
 
-                # If we swapped then (potentially) defer.
-                if swap_count <= 2
-                        do_next()
-                        return
+                sort_context.count-- if swap_count > 2 # If we didn't swap then doesn't count
+                do_next()
+                return
 
         if in_partition
                 # We would have swapped pivot to end at start.
