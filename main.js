@@ -424,8 +424,8 @@
     }
   };
 
-  // Default to bubble sort
-  sort = bsort;
+  // Default to selection sort
+  sort = ssort;
 
   $(document).ready(function() {
     canvas = $('#mainCanvas');
