@@ -2,9 +2,9 @@
 (function() {
   var UPDATE_INTERVAL, bsort, canvas, checkDone, checkDoneInterval, colours, context, defer, height, hsort, initColours, isort, qsort, rectHeight, rectWidth, reset, sort, sort_context, ssort, start, swapRects, timeouts, toHslString, width;
 
-  [rectWidth, rectHeight] = [40, 40];
+  [rectWidth, rectHeight] = [20, 20];
 
-  UPDATE_INTERVAL = 500;
+  UPDATE_INTERVAL = 1000;
 
   // Initialised by reset().
   checkDoneInterval = null;
@@ -146,7 +146,7 @@
   // Selection sort
   // @author Bernhard Häussner (https://github.com/bxt)
   ssort = function() {
-    var count, i, j, min;
+    var i, j, min;
     if (sort_context == null) {
       sort_context = {
         i: 1,
@@ -155,7 +155,7 @@
         count: 0
       };
     }
-    ({i, j, count, min} = sort_context);
+    ({i, j, min} = sort_context);
     if (j === colours.length) {
       swapRects(i - 1, min);
       if (i === colours.length - 1) {
@@ -180,7 +180,7 @@
 
   // Good old bubble sort
   bsort = function() {
-    var count, i, swapped;
+    var i, swapped;
     if (sort_context == null) {
       sort_context = {
         swapped: false,
@@ -188,7 +188,7 @@
         count: 0
       };
     }
-    ({swapped, i, count} = sort_context);
+    ({swapped, i} = sort_context);
     if (i === colours.length) {
       sort_context.i = 1;
       sort_context.swapped = false;
@@ -211,134 +211,226 @@
   };
 
   qsort = function(tukey) {
-    var doQsort, getPivotInd, medianOfThree, partition;
-    // Put the median of colours.val's in colours[a].
-    // Shamelessly stolen from Go's quicksort implementation.
-    // See http://golang.org/src/pkg/sort/sort.go
-    medianOfThree = function(a, b, c) {
-      var m0, m1, m2;
+    var a, b, c, curr, do_next, from, from_stack, in_partition, m0, m1, m2, median_stack, mid, pivot_ind, pivot_val, s, stack, started_partition, started_tukey_median, swap_count, to, to_stack;
+    if (sort_context == null) {
+      sort_context = {
+        median_stack: [],
+        in_partition: false,
+        pivot_ind: -1,
+        pivot_val: -1,
+        started_tukey_median: false,
+        started_partition: false,
+        from_stack: [],
+        to_stack: [],
+        from: 0,
+        to: colours.length - 1,
+        curr: 0,
+        count: 0
+      };
+    }
+    ({median_stack, in_partition, pivot_ind, pivot_val, started_tukey_median, from_stack, to_stack, from, to, curr, started_partition} = sort_context);
+    do_next = function() {
+      sort_context.count++;
+      if ((sort_context.count % UPDATE_INTERVAL) === 0) {
+        return defer(function() {
+          return qsort(tukey);
+        });
+      } else {
+        return qsort(tukey);
+      }
+    };
+    if (median_stack.length > 0) {
+      [a, b, c, swap_count] = median_stack[median_stack.length - 1];
       // Rename vars for clarity, as we want the median in a, not b.
       m0 = b;
       m1 = a;
       m2 = c;
-      if (colours[m1].val < colours[m0].val) {
-        // Bubble sort on colours[m0,m1,m2].val
-        swapRects(m1, m0);
-      }
-      if (colours[m2].val < colours[m1].val) {
-        swapRects(m2, m1);
-      }
-      if (colours[m1].val < colours[m0].val) {
-        return swapRects(m1, m0);
-      }
-    };
-    // Now colours[m0].val <= colours[m1].val <= colours[m2].val
-    getPivotInd = function(from, to) {
-      var mid, s;
-      // Do it this way to avoid overflow.
-      mid = Math.floor(from + (to - from) / 2);
-      if (!tukey) {
-        return mid;
-      }
-      // Using Tukey's 'median of medians'
-      // See http://www.johndcook.com/blog/2009/06/23/tukey-median-ninther/
-      if (to - from > 40) {
-        s = Math.floor((to - from) / 8);
-        medianOfThree(from, from + s, from + 2 * s);
-        medianOfThree(mid, mid - s, mid + s);
-        medianOfThree(to - 1, to - 1 - s, to - 1 - 2 * s);
-      }
-      medianOfThree(from, mid, to - 1);
-      // We've put the median in from.
-      return from;
-    };
-    partition = function(from, to, pivotInd) {
-      var i, k, pivot, ref, ref1;
-      pivot = colours[pivotInd].val;
-      // Put pivot at end for now.
-      swapRects(pivotInd, to);
-      pivotInd = from;
-      for (i = k = ref = from, ref1 = to; (ref <= ref1 ? k < ref1 : k > ref1); i = ref <= ref1 ? ++k : --k) {
-        if (colours[i].val <= pivot) {
-          swapRects(i, pivotInd);
-          pivotInd++;
+      if (swap_count === 0) {
+        if (colours[m1].val < colours[m0].val) {
+          swapRects(m1, m0);
+          // Increment count.
+          sort_context.median_stack[median_stack.length - 1][3]++;
+        } else {
+          swap_count++;
         }
       }
+      if (swap_count === 1) {
+        if (colours[m2].val < colours[m1].val) {
+          swapRects(m2, m1);
+          // Increment count.
+          sort_context.median_stack[median_stack.length - 1][3]++;
+        } else {
+          swap_count++;
+        }
+      }
+      if (swap_count === 2) {
+        if (colours[m1].val < colours[m0].val) {
+          swapRects(m1, m0);
+        } else {
+          swap_count++;
+        }
+      }
+      if (swap_count >= 2) {
+        sort_context.median_stack.pop();
+      }
+      if (swap_count > 2) { // If we didn't swap then doesn't count
+        sort_context.count--;
+      }
+      do_next();
+      return;
+    }
+    if (in_partition) {
+      // We would have swapped pivot to end at start.
+      while (curr < to) {
+        if (colours[curr].val <= pivot_val) {
+          swapRects(curr, pivot_ind);
+          sort_context.curr++;
+          sort_context.pivot_ind++;
+          do_next();
+          return;
+        }
+        sort_context.curr++;
+        curr = sort_context.curr;
+      }
+      // End of partition.
+      sort_context.in_partition = false;
       // Swap 'em back.
-      swapRects(pivotInd, to);
-      return pivotInd;
-    };
-    doQsort = function(from, to) {
-      var pivotInd;
-      if (from >= to) {
+      swapRects(pivot_ind, to);
+      do_next();
+      return;
+    }
+    // OK we are out of the partition we are at the top level sort.
+
+    // If we're done on this line then pop stack on next.
+    if (from >= to) {
+      if (from_stack.length === 0) {
         return;
       }
-      pivotInd = getPivotInd(from, to);
-      pivotInd = partition(from, to, pivotInd);
-      return defer(function() {
-        doQsort(from, pivotInd - 1);
-        return doQsort(pivotInd + 1, to);
-      });
-    };
-    return doQsort(0, colours.length - 1);
+      sort_context.from = sort_context.from_stack.pop();
+      sort_context.to = sort_context.to_stack.pop();
+      sort_context.curr = sort_context.from;
+      sort_context.pivot_ind = -1;
+      sort_context.count--; // Shouldn't count towards swaps.
+      do_next();
+      return;
+    }
+    // Do we need to figure out the pivot index?
+    if (pivot_ind === -1) {
+      mid = Math.floor(from + (to - from) / 2);
+      // Easy option first.
+      if (!tukey) {
+        // Do it this way to avoid overflow.
+        sort_context.pivot_ind = mid;
+        pivot_ind = mid;
+      } else if (started_tukey_median) {
+        // Completed tukey median calculation.
+        sort_context.pivot_ind = from;
+        pivot_ind = from;
+        sort_context.started_tukey_median = false;
+      } else {
+        // OK kick off tukey median calculation.
+        sort_context.started_tukey_median = true;
+        stack = [];
+        // We do this last as stack so reverse order.
+        stack.push([from, mid, to - 1, 0]);
+        if (to - from > 40) {
+          s = Math.floor((to - from) / 8);
+          // reverse order as stack.
+          stack.push([to - 1, to - 1 - s, to - 1 - 2 * s, 0]);
+          stack.push([mid, mid - s, mid + s, 0]);
+          stack.push([from, from + s, from + 2 * s, 0]);
+        }
+        sort_context.median_stack = stack;
+        // Handle this on next invocation.
+        sort_context.count--; // Shouldn't count towards swaps.
+        do_next();
+        return;
+      }
+    }
+    // OK we have a pivot index.
+
+    // Did we start the partition?
+    if (!started_partition) {
+      sort_context.started_partition = true;
+      sort_context.in_partition = true;
+      sort_context.curr = from;
+      sort_context.pivot_val = colours[pivot_ind].val;
+      // Put pivot at the end of the array.
+      swapRects(pivot_ind, to);
+      sort_context.pivot_ind = from;
+      // Handle this on next invocation.
+      do_next();
+      return;
+    }
+    // OK partition is done.
+    sort_context.started_partition = false;
+    // Do lower half first, then push next on stack.
+    sort_context.to = pivot_ind - 1;
+    sort_context.pivot_ind = -1;
+    sort_context.from_stack.push(pivot_ind + 1);
+    sort_context.to_stack.push(to);
+    // Handle this on next invocation.
+    sort_context.count--; // Shouldn't count towards swaps.
+    return do_next();
   };
 
   // Heapsort
   // Based on this Java implementation: http://git.io/heapsort
   // @author Bernhard Häussner (https://github.com/bxt)
   hsort = function() {
-    var i, k, l, maxHeapify, popMaxValue, ref, ref1, size, stack, work;
-    // Let the browser render between steps using a call stack
-    stack = [];
-    work = function() {
-      if (stack.length) {
-        stack.pop()(); // execute stack top
-        return defer(work); // loop
-      }
-    };
-    size = colours.length;
-    // Make branch from i downwards a proper max heap
-    maxHeapify = function(i) {
-      var largest, left, right;
-      left = i * 2 + 1;
-      right = i * 2 + 2;
-      largest = i;
-      if (left < size && colours[left].val > colours[i].val) {
+    var count, j, largest, last_j, left, making_heap, right, sifting_down, size;
+    if (sort_context == null) {
+      sort_context = {
+        j: Math.floor(colours.length / 2) - 1,
+        last_j: Math.floor(colours.length / 2) - 1,
+        size: colours.length,
+        count: 0,
+        making_heap: true,
+        sifting_down: false
+      };
+    }
+    ({j, last_j, size, count, making_heap, sifting_down} = sort_context);
+    if (making_heap || sifting_down) {
+      left = j * 2 + 1;
+      right = j * 2 + 2;
+      largest = j;
+      if (left < size && colours[left].val > colours[j].val) {
         largest = left;
       }
       if (right < size && colours[right].val > colours[largest].val) {
         largest = right;
       }
-      if (i !== largest) {
-        swapRects(i, largest);
-        return maxHeapify(largest);
+      if (j !== largest) {
+        swapRects(j, largest);
+        sort_context.j = largest;
+      } else if (making_heap && last_j > 0) { //last_j < size//2 - 1
+        //sort_context.j = last_j + 1
+        sort_context.j = last_j - 1;
+        sort_context.last_j = sort_context.j;
+      } else {
+        sort_context.making_heap = false;
+        sort_context.sifting_down = false;
       }
-    };
-    //stack.push(-> maxHeapify(largest))
-
-    // Remove the top of the heap and move it behind the heap
-    popMaxValue = function() {
-      size--;
-      swapRects(0, size);
-      if (size > 0) {
-        return maxHeapify(0);
+    } else {
+      if (size === 0) {
+        return;
       }
-    };
-// Fill the call stack (reverse order)
-    for (i = k = ref = size - 1; (ref <= 0 ? k < 0 : k > 0); i = ref <= 0 ? ++k : --k) {
-      stack.push(popMaxValue);
+      // Put largest block at end.
+      swapRects(0, size - 1);
+      // Now heapify the rest.
+      sort_context.size--;
+      sort_context.sifting_down = true;
+      sort_context.j = 0;
     }
-    for (i = l = 0, ref1 = Math.floor(size / 2) - 1; (0 <= ref1 ? l <= ref1 : l >= ref1); i = 0 <= ref1 ? ++l : --l) {
-      (function(i) {
-        return stack.push(function() {
-          return maxHeapify(i);
-        });
-      })(i);
+    sort_context.count++;
+    if ((sort_context.count % UPDATE_INTERVAL) === 0) {
+      return defer(hsort);
+    } else {
+      return hsort();
     }
-    return work();
   };
 
-  // Default to bubble sort.
+  // Default to bubble sort
   sort = bsort;
 
   $(document).ready(function() {
