@@ -111,14 +111,32 @@ isort = ->
 # Selection sort
 # @author Bernhard Häussner (https://github.com/bxt)
 ssort = ->
-        min = index-1
-        for j in [index...colours.length]
-                min = j if colours[j].val < colours[min].val
+        sort_context ?=
+                i: 1
+                j: 1
+                min: 0
+                count: 0
 
-        swapRects(index-1, min)
+        { i, j, count, min } = sort_context
 
-        index++
-        defer(ssort) if index < colours.length
+        if j == colours.length
+                swapRects(i-1, min)
+
+                return if i == colours.length - 1
+
+                sort_context.i++
+                sort_context.min = sort_context.i - 1
+                sort_context.j = sort_context.i
+        else
+                sort_context.min = j if colours[j].val < colours[min].val
+                sort_context.j++
+
+        sort_context.count++
+
+        if (sort_context.count % UPDATE_INTERVAL) == 0
+                defer(ssort)
+        else
+                ssort()
 
 bsort = ->
         swapped = false
