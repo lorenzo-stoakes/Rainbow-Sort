@@ -2,7 +2,7 @@
 (function() {
   var UPDATE_INTERVAL, bsort, canvas, checkDone, checkDoneInterval, colours, context, defer, height, hsort, initColours, isort, qsort, rectHeight, rectWidth, reset, sort, sort_context, ssort, start, swapRects, timeouts, toHslString, width;
 
-  [rectWidth, rectHeight] = [20, 20];
+  [rectWidth, rectHeight] = [32, 32];
 
   UPDATE_INTERVAL = 1250;
 
