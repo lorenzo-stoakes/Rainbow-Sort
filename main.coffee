@@ -138,14 +138,33 @@ ssort = ->
         else
                 ssort()
 
+# Good old bubble sort
 bsort = ->
-        swapped = false
-        for i in [1...colours.length]
-                if colours[i - 1].val > colours[i].val
-                        swapRects(i - 1, i)
-                        swapped = true
+        sort_context ?=
+                swapped: false
+                i: 1
+                count: 0
 
-        defer(bsort) if swapped
+        { swapped, i, count } = sort_context
+
+        if i == colours.length
+                sort_context.i = 1
+                sort_context.swapped = false
+
+                bsort() if swapped
+                return
+
+        if colours[i - 1].val > colours[i].val
+                swapRects(i - 1, i)
+                sort_context.swapped = true
+
+        sort_context.i++
+        sort_context.count++
+
+        if (sort_context.count % UPDATE_INTERVAL) == 0
+                defer(bsort)
+        else
+                bsort()
 
 qsort = (tukey) ->
         # Put the median of colours.val's in colours[a].
