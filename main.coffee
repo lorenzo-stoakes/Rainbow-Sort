@@ -1,6 +1,6 @@
 [rectWidth, rectHeight] = [20, 20]
 
-UPDATE_INTERVAL = 1000
+UPDATE_INTERVAL = 1250
 
 # Initialised by reset().
 checkDoneInterval = null
