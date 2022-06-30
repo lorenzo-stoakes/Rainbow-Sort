@@ -377,8 +377,8 @@ hsort = ->
                 hsort()
 
 
-# Default to bubble sort
-sort = bsort
+# Default to selection sort
+sort = ssort
 
 $(document).ready(->
         canvas = $('#mainCanvas')
