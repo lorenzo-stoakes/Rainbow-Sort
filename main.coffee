@@ -1,6 +1,6 @@
-[rectWidth, rectHeight] = [60, 60]
+[rectWidth, rectHeight] = [40, 40]
 
-UPDATE_INTERVAL = 1000
+UPDATE_INTERVAL = 500
 
 # Initialised by reset().
 checkDoneInterval = null
@@ -271,8 +271,8 @@ hsort = ->
 
         do work
 
-# Default to insertion sort.
-sort = isort
+# Default to bubble sort.
+sort = bsort
 
 $(document).ready(->
         canvas = $('#mainCanvas')
