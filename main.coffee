@@ -234,8 +234,8 @@ hsort = ->
 
         do work
 
-# Default to bubble sort.
-sort = bsort
+# Default to insertion sort.
+sort = isort
 
 $(document).ready(->
         canvas = $('#mainCanvas')
