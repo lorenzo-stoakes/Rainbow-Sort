@@ -1,4 +1,4 @@
-[rectWidth, rectHeight] = [20, 20]
+[rectWidth, rectHeight] = [60, 60]
 
 # Initialised by reset().
 checkDoneInterval = null
