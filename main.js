@@ -4,7 +4,7 @@
 
   [rectWidth, rectHeight] = [20, 20];
 
-  UPDATE_INTERVAL = 1000;
+  UPDATE_INTERVAL = 1250;
 
   // Initialised by reset().
   checkDoneInterval = null;
@@ -276,8 +276,7 @@
       if (swap_count > 2) { // If we didn't swap then doesn't count
         sort_context.count--;
       }
-      do_next();
-      return;
+      return do_next();
     }
     if (in_partition) {
       // We would have swapped pivot to end at start.
@@ -286,8 +285,7 @@
           swapRects(curr, pivot_ind);
           sort_context.curr++;
           sort_context.pivot_ind++;
-          do_next();
-          return;
+          return do_next();
         }
         sort_context.curr++;
         curr = sort_context.curr;
@@ -296,8 +294,7 @@
       sort_context.in_partition = false;
       // Swap 'em back.
       swapRects(pivot_ind, to);
-      do_next();
-      return;
+      return do_next();
     }
     // OK we are out of the partition we are at the top level sort.
 
@@ -311,8 +308,7 @@
       sort_context.curr = sort_context.from;
       sort_context.pivot_ind = -1;
       sort_context.count--; // Shouldn't count towards swaps.
-      do_next();
-      return;
+      return do_next();
     }
     // Do we need to figure out the pivot index?
     if (pivot_ind === -1) {
@@ -343,8 +339,7 @@
         sort_context.median_stack = stack;
         // Handle this on next invocation.
         sort_context.count--; // Shouldn't count towards swaps.
-        do_next();
-        return;
+        return do_next();
       }
     }
     // OK we have a pivot index.
@@ -359,8 +354,7 @@
       swapRects(pivot_ind, to);
       sort_context.pivot_ind = from;
       // Handle this on next invocation.
-      do_next();
-      return;
+      return do_next();
     }
     // OK partition is done.
     sort_context.started_partition = false;

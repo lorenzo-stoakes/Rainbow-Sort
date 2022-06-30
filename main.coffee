@@ -227,8 +227,7 @@ qsort = (tukey) ->
                 sort_context.median_stack.pop() if swap_count >= 2
 
                 sort_context.count-- if swap_count > 2 # If we didn't swap then doesn't count
-                do_next()
-                return
+                return do_next()
 
         if in_partition
                 # We would have swapped pivot to end at start.
@@ -238,8 +237,7 @@ qsort = (tukey) ->
 
                                 sort_context.curr++
                                 sort_context.pivot_ind++
-                                do_next()
-                                return
+                                return do_next()
 
                         sort_context.curr++
                         curr = sort_context.curr
@@ -248,8 +246,7 @@ qsort = (tukey) ->
                 sort_context.in_partition = false
                 # Swap 'em back.
                 swapRects(pivot_ind, to)
-                do_next()
-                return
+                return do_next()
 
         # OK we are out of the partition we are at the top level sort.
 
@@ -263,8 +260,7 @@ qsort = (tukey) ->
                 sort_context.pivot_ind = -1
 
                 sort_context.count-- # Shouldn't count towards swaps.
-                do_next()
-                return
+                return do_next()
 
         # Do we need to figure out the pivot index?
         if pivot_ind == -1
@@ -300,8 +296,7 @@ qsort = (tukey) ->
 
                         # Handle this on next invocation.
                         sort_context.count-- # Shouldn't count towards swaps.
-                        do_next()
-                        return
+                        return do_next()
 
         # OK we have a pivot index.
 
@@ -318,8 +313,7 @@ qsort = (tukey) ->
                 sort_context.pivot_ind = from
 
                 # Handle this on next invocation.
-                do_next()
-                return
+                return do_next()
 
         # OK partition is done.
         sort_context.started_partition = false
@@ -332,7 +326,7 @@ qsort = (tukey) ->
 
         # Handle this on next invocation.
         sort_context.count-- # Shouldn't count towards swaps.
-        do_next()
+        return do_next()
 
 # Heapsort
 # Based on this Java implementation: http://git.io/heapsort
