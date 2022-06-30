@@ -1,4 +1,4 @@
-[rectWidth, rectHeight] = [20, 20]
+[rectWidth, rectHeight] = [32, 32]
 
 UPDATE_INTERVAL = 1250
 
