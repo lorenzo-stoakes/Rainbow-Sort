@@ -1,6 +1,6 @@
 [rectWidth, rectHeight] = [20, 20]
 
-UPDATE_INTERVAL = 5000
+UPDATE_INTERVAL = 1000
 
 # Initialised by reset().
 checkDoneInterval = null
@@ -117,7 +117,7 @@ ssort = ->
                 min: 0
                 count: 0
 
-        { i, j, count, min } = sort_context
+        { i, j, min } = sort_context
 
         if j == colours.length
                 swapRects(i-1, min)
@@ -145,7 +145,7 @@ bsort = ->
                 i: 1
                 count: 0
 
-        { swapped, i, count } = sort_context
+        { swapped, i } = sort_context
 
         if i == colours.length
                 sort_context.i = 1
@@ -167,69 +167,173 @@ bsort = ->
                 bsort()
 
 qsort = (tukey) ->
-        # Put the median of colours.val's in colours[a].
-        # Shamelessly stolen from Go's quicksort implementation.
-        # See http://golang.org/src/pkg/sort/sort.go
-        medianOfThree = (a, b, c) ->
+        sort_context ?=
+                median_stack: []
+                in_partition: false
+                pivot_ind: -1
+                pivot_val: -1
+                started_tukey_median: false
+                started_partition: false
+
+                from_stack: []
+                to_stack: []
+
+                from: 0
+                to: colours.length - 1
+                curr: 0
+
+                count: 0
+
+        { median_stack, in_partition, pivot_ind, pivot_val, started_tukey_median, from_stack, to_stack, from, to, curr, started_partition } = sort_context
+
+        do_next = ->
+                sort_context.count++
+
+                if (sort_context.count % UPDATE_INTERVAL) == 0
+                        defer(-> qsort(tukey))
+                else
+                        qsort(tukey)
+
+        if median_stack.length > 0
+                [ a, b, c, swap_count ] = median_stack[median_stack.length - 1]
+
                 # Rename vars for clarity, as we want the median in a, not b.
                 m0 = b
                 m1 = a
                 m2 = c
 
-                # Bubble sort on colours[m0,m1,m2].val
-                swapRects(m1, m0) if colours[m1].val < colours[m0].val
-                swapRects(m2, m1) if colours[m2].val < colours[m1].val
-                swapRects(m1, m0) if colours[m1].val < colours[m0].val
+                if swap_count == 0
+                        if colours[m1].val < colours[m0].val
+                                swapRects(m1, m0)
+                                # Increment count.
+                                sort_context.median_stack[median_stack.length - 1][3]++
+                        else
+                                swap_count++
 
-                # Now colours[m0].val <= colours[m1].val <= colours[m2].val
+                if swap_count == 1
+                        if colours[m2].val < colours[m1].val
+                                swapRects(m2, m1)
+                                # Increment count.
+                                sort_context.median_stack[median_stack.length - 1][3]++
+                        else
+                                swap_count++
 
-        getPivotInd = (from, to) ->
-                # Do it this way to avoid overflow.
+                if swap_count == 2
+                        if colours[m1].val < colours[m0].val
+                                swapRects(m1, m0)
+                        else
+                                swap_count++
+
+                sort_context.median_stack.pop() if swap_count >= 2
+
+                # If we swapped then (potentially) defer.
+                if swap_count <= 2
+                        do_next()
+                        return
+
+        if in_partition
+                # We would have swapped pivot to end at start.
+                while curr < to
+                        if colours[curr].val <= pivot_val
+                                swapRects(curr, pivot_ind)
+
+                                sort_context.curr++
+                                sort_context.pivot_ind++
+                                do_next()
+                                return
+
+                        sort_context.curr++
+                        curr = sort_context.curr
+
+                # End of partition.
+                sort_context.in_partition = false
+                # Swap 'em back.
+                swapRects(pivot_ind, to)
+                do_next()
+                return
+
+        # OK we are out of the partition we are at the top level sort.
+
+        # If we're done on this line then pop stack on next.
+        if from >= to
+                return if from_stack.length == 0
+
+                sort_context.from = sort_context.from_stack.pop()
+                sort_context.to = sort_context.to_stack.pop()
+                sort_context.curr = sort_context.from
+                sort_context.pivot_ind = -1
+
+                sort_context.count-- # Shouldn't count towards swaps.
+                do_next()
+                return
+
+        # Do we need to figure out the pivot index?
+        if pivot_ind == -1
                 mid = Math.floor(from + (to - from)/2)
 
-                return mid if !tukey
+                # Easy option first.
+                if not tukey
+                        # Do it this way to avoid overflow.
+                        sort_context.pivot_ind = mid
+                        pivot_ind = mid
+                else if started_tukey_median
+                        # Completed tukey median calculation.
+                        sort_context.pivot_ind = from
+                        pivot_ind = from
+                        sort_context.started_tukey_median = false
+                else
+                        # OK kick off tukey median calculation.
+                        sort_context.started_tukey_median = true
 
-                # Using Tukey's 'median of medians'
-                # See http://www.johndcook.com/blog/2009/06/23/tukey-median-ninther/
-                if to - from > 40
-                        s = Math.floor((to - from)/8)
-                        medianOfThree(from, from + s, from + 2 * s)
-                        medianOfThree(mid, mid - s, mid + s)
-                        medianOfThree(to - 1, to - 1 - s, to - 1 - 2 * s)
+                        stack = []
+                        # We do this last as stack so reverse order.
+                        stack.push([from, mid, to - 1, 0])
 
-                medianOfThree(from, mid, to - 1)
+                        if to - from > 40
+                                s = Math.floor((to - from)/8)
 
-                # We've put the median in from.
-                return from
+                                # reverse order as stack.
+                                stack.push([to - 1, to - 1 - s, to - 1 - 2 * s, 0])
+                                stack.push([mid, mid - s, mid + s, 0])
+                                stack.push([from, from + s, from + 2 * s, 0])
 
-        partition = (from, to, pivotInd) ->
-                pivot = colours[pivotInd].val
-                # Put pivot at end for now.
-                swapRects(pivotInd, to)
+                        sort_context.median_stack = stack
 
-                pivotInd = from
-                for i in [from...to]
-                        if colours[i].val <= pivot
-                                swapRects(i, pivotInd)
-                                pivotInd++
+                        # Handle this on next invocation.
+                        sort_context.count-- # Shouldn't count towards swaps.
+                        do_next()
+                        return
 
-                # Swap 'em back.
-                swapRects(pivotInd, to)
+        # OK we have a pivot index.
 
-                return pivotInd
+        # Did we start the partition?
+        if not started_partition
+                sort_context.started_partition = true
+                sort_context.in_partition = true
+                sort_context.curr = from
 
-        doQsort = (from, to) ->
-                return if from >= to
+                sort_context.pivot_val = colours[pivot_ind].val
 
-                pivotInd = getPivotInd(from, to)
-                pivotInd = partition(from, to, pivotInd)
+                # Put pivot at the end of the array.
+                swapRects(pivot_ind, to)
+                sort_context.pivot_ind = from
 
-                defer(->
-                        doQsort(from, pivotInd - 1)
-                        doQsort(pivotInd + 1, to)
-                )
+                # Handle this on next invocation.
+                do_next()
+                return
 
-        doQsort(0, colours.length - 1)
+        # OK partition is done.
+        sort_context.started_partition = false
+
+        # Do lower half first, then push next on stack.
+        sort_context.to = pivot_ind - 1
+        sort_context.pivot_ind = -1
+        sort_context.from_stack.push(pivot_ind + 1)
+        sort_context.to_stack.push(to)
+
+        # Handle this on next invocation.
+        sort_context.count-- # Shouldn't count towards swaps.
+        do_next()
 
 # Heapsort
 # Based on this Java implementation: http://git.io/heapsort
