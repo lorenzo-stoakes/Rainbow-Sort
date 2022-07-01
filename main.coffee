@@ -3,11 +3,9 @@
 UPDATE_INTERVAL = 1250
 
 # Initialised by reset().
-checkDoneInterval = null
 colours = null
 context = null
 height = null
-start = null
 width = null
 
 sort_context = null
@@ -33,20 +31,7 @@ initColours = ->
                         context.fillStyle = toHslString(hue)
                         context.fillRect(x, y, rectWidth, rectHeight)
 
-checkDone = ->
-        for i in [1...colours.length]
-                return if colours[i - 1].val > colours[i].val
-
-        end = Date.now()
-        window.clearInterval(checkDoneInterval)
-
-        ms = end - start
-
-        $('#algoName').html($('#algo').val())
-        $('#ms').html(ms)
-
 reset = ->
-        window.clearInterval(checkDoneInterval) if checkDoneInterval?
         window.clearTimeout(timeout) while (timeout = timeouts.pop())
 
         colours = []
@@ -58,13 +43,9 @@ reset = ->
 
         context = canvas[0].getContext('2d')
 
-        start = Date.now()
-
         initColours()
         sort_context = null
         defer(sort)
-
-        checkDoneInterval = window.setInterval(checkDone, 10)
 
 swapRects = (ind1, ind2) ->
         val1 = colours[ind1]
