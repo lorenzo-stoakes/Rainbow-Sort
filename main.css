@@ -14,10 +14,23 @@ a {
     color: white;
     float: right;
     font-family: 'Helvetica', sans-serif;
-    font-size: 10pt;
+
     opacity: 0.4;
     padding: 1em;
     z-index: 10;
+}
+
+#panel button {
+    font-size: 16pt;
+}
+
+#panel select {
+    font-size: 16pt;
+    text-align: center;
+}
+
+#panel input {
+    width: 200px;
 }
 
 #panel:hover {
