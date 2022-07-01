@@ -370,14 +370,28 @@ $(document).ready(->
         $('#algo').change(->
                 selected = $('#algo').val()
 
-                sort =
-                        switch $(@).children(':selected').attr('id')
-                                when 'bsort'  then bsort
-                                when 'isort'  then isort
-                                when 'qsort1' then -> qsort(false)
-                                when 'qsort2' then -> qsort(true)
-                                when 'hsort' then hsort
-                                when 'ssort' then ssort
+                switch $(@).children(':selected').attr('id')
+                        when 'ssort'
+                                rectWidth = 32
+                                sort = ssort
+                        when 'bsort'
+                                rectWidth = 32
+                                sort = bsort
+                        when 'isort'
+                                rectWidth = 32
+                                sort = isort
+                        when 'qsort1'
+                                rectWidth = 10
+                                sort = -> qsort(false)
+                        when 'qsort2'
+                                rectWidth = 10
+                                sort = -> qsort(true)
+                        when 'hsort'
+                                rectWidth = 10
+                                sort = hsort
+
+                rectHeight = rectWidth
+                $('#squareSize').val(rectWidth)
 
                 reset()
         )
