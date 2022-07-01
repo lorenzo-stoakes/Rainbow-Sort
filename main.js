@@ -427,19 +427,19 @@
           sort = isort;
           break;
         case 'qsort1':
-          rectWidth = 10;
+          rectWidth = 4;
           sort = function() {
             return qsort(false);
           };
           break;
         case 'qsort2':
-          rectWidth = 10;
+          rectWidth = 4;
           sort = function() {
             return qsort(true);
           };
           break;
         case 'hsort':
-          rectWidth = 10;
+          rectWidth = 4;
           sort = hsort;
       }
       rectHeight = rectWidth;

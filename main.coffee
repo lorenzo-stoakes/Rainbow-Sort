@@ -381,13 +381,13 @@ $(document).ready(->
                                 rectWidth = 32
                                 sort = isort
                         when 'qsort1'
-                                rectWidth = 10
+                                rectWidth = 4
                                 sort = -> qsort(false)
                         when 'qsort2'
-                                rectWidth = 10
+                                rectWidth = 4
                                 sort = -> qsort(true)
                         when 'hsort'
-                                rectWidth = 10
+                                rectWidth = 4
                                 sort = hsort
 
                 rectHeight = rectWidth
